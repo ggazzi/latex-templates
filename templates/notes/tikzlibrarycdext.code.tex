@@ -1,0 +1,22 @@
+\usepackage{environ, etoolbox}
+\usetikzlibrary{cd,external}
+
+\def\temp{&} \catcode`&=\active \let&=\temp
+
+\newcommand{\mytikzcdcontext}[2]{
+  \begin{tikzpicture}[baseline=(maintikzcdnode.base)]
+    \node (maintikzcdnode) [inner sep=0, outer sep=0] {\begin{tikzcd}[#2]
+        #1
+    \end{tikzcd}};
+  \end{tikzpicture}}
+
+\NewEnviron{mycd}[1][]{%
+  % In the following, we need \BODY to expanded before \mytikzcdcontext
+  % such that the md5 function gets the tikzcd content with \BODY expanded.
+  % However, expand it only once, because the \tikz-macros aren't
+  % defined at this point yet. The same thing holds for the arguments to
+  % the tikzcd-environment.
+  \def\myargs{#1}%
+  \edef\mydiagram{\noexpand\mytikzcdcontext{\expandonce\BODY}{\expandonce\myargs}}%
+  \mydiagram%
+}

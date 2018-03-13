@@ -1,0 +1,9 @@
+{
+  "latex-workshop.chktex.enabled": false,
+  "latex-workshop.latex.autoBuild.onSave.enabled": false,
+  "cSpell.words": [
+    "Jinja",
+    "mkdir",
+    "shutil"
+  ]
+}

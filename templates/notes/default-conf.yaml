@@ -1,0 +1,38 @@
+# Short project name, used for filenames
+name: notes 
+
+# Title for the document
+title: Notes About Something 
+
+# Each author has a full name, a short version and a prefix used for latex commands.
+authors: 
+  - 
+    name: Some Author
+    short: Author
+    cmd: auth
+
+# List of sections with their titles and labels.
+# The latex labels for each section will be prefixed with 'sec:'.
+sections:
+  -
+    title: First Section
+    label: fst
+  - 
+    title: Second Section
+    label: snd
+
+# Bibliography style
+bibstyle: acm
+
+### The following options will determine what will be added to the preamble
+
+subject:
+  math:
+    category_theory: true
+    sets: true
+    graphs: true
+  gratra: true
+
+tikz: true
+
+notes: true

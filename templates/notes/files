@@ -1,0 +1,10 @@
+-
+  src: notes.tex
+  tgt: \EXPR{ name }.tex
+-
+  src: notes.bib
+  tgt: \EXPR{ name }.bib
+- Makefile
+%%$ if tikz and subject.math.category_theory:
+- tikzlibrarycdext.code.tex
+%%$ endif
