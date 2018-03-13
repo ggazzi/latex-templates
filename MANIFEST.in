@@ -1,0 +1,2 @@
+recursive-include latex_templates/libraries *
+recursive-include latex_templates/templates *
