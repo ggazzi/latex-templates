@@ -1,0 +1,28 @@
+%%$ if tikz:
+%%% TikZ utilities %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \usetikzlibrary{positioning,fit,calc} % Easier positions/sizes
+  \usetikzlibrary{backgrounds,shadows} % Prettier diagrams
+  \usetikzlibrary{graphs}
+  %%$ if subject.math.category_theory:
+  \usetikzlibrary{cd} % Commutative diagrams
+
+  \tikzset{commutative diagrams/transformation step/.style={Rightarrow}}
+  \tikzset{commutative diagrams/monic/.style={tail}}
+  \tikzset{commutative diagrams/epic/.style={two heads}}
+  %%$ endif
+
+  %%$ if tikz.externalize:
+  \usetikzlibrary{external\STMT{ if subject.math.category_theory }, cdext\STMT{ endif }}
+  %\tikzexternalize[prefix=images-tikz/]
+  %%$ endif
+
+  %%$ if subject.math.category_theory:
+  % Tikz corners for indicating pullbacks/pushouts
+    \newcommand{\corner}[1]{\tikz[#1]{ \draw[-] (0,.7em) -- (0,0) -- (.7em,0); }}
+    \renewcommand\llcorner{\corner{}}
+    \renewcommand\lrcorner{\corner{rotate=90}}
+    \renewcommand\urcorner{\corner{rotate=180}}
+    \renewcommand\ulcorner{\corner{rotate=270}}
+  %%$ endif
+  %%# This comment ensures a newline is left at the end of the file
+%%$ endif

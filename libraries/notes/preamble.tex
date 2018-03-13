@@ -1,0 +1,18 @@
+\#{
+Configures the fixme package for the authors of the template.
+
+Requires a list `authors' containing objects with two fields:
+`cmd' with the prefix used for the fixme commands, and `short'
+with a shortened name that will be shown in the comments.
+} 
+%%$ if notes:
+%%% Draft notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+  \fxusetheme{colorsig}
+  %%$ for author in authors:
+
+  \FXRegisterAuthor{\EXPR{ author.cmd }}{l\EXPR{ author.cmd }}{\EXPR{ author.short }}
+  \newcommand{\\EXPR{ author.cmd }}[1]{\\EXPR{author.cmd}note{#1}}
+  \WithSuffix\newcommand{\\EXPR{ author.cmd }}*[2]{\\EXPR{author.cmd}note*{#1}{#2}}
+  %%$ endfor
+  %%# This comments ensures a newline is left at the end
+%%$ endif

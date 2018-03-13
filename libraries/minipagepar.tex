@@ -1,0 +1,15 @@
+%%% Minipage Indentation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+% The environment minipagepar works mostly like minipage, but indents
+% paragraphs properly. The regular minipage environment sets \parindent to zero,
+% which is good if you have images inside it but bad if you have text.
+%
+% Also, minipagepar can take only the first optional argument of minipage.
+
+  \newlength{\currentparindent}
+  \newenvironment{minipagepar}[2][]
+    {\setlength{\currentparindent}{\parindent}%
+    \begin{minipage}[#1]{#2}%
+    \setlength{\parindent}{\currentparindent}}
+    {\end{minipage}}
+

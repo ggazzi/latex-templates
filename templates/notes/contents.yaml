@@ -6,5 +6,7 @@
   tgt: \EXPR{ name }.bib
 - Makefile
 %%$ if tikz and subject.math.category_theory:
-- tikzlibrarycdext.code.tex
+- 
+  src: tikz/tikzlibrarycdext.code.tex
+  tgt: tikzlibrarycdext.code.tex
 %%$ endif

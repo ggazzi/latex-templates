@@ -11,20 +11,21 @@ from pathlib import Path
 class Template:
 
   @classmethod
-  def find(cls, search_dirs, name):
+  def find(cls, template_path, name, lib_path):
     verbose('Looking for template "{}"'.format(name))
 
-    for dir in search_dirs:
+    for dir in template_path:
       path = Path(dir) / name
       verbose('  trying ' + str(path))
       if path.is_dir():
-        return cls(path)
+        return cls(path, lib_path)
 
     raise Exception('No template "{}" found.'.format(name))
 
-  def __init__(self, root_dir):
+  def __init__(self, root_dir, lib_path):
     self.__root_dir = Path(root_dir)
 
+    paths = [root_dir] + list(lib_path)
     self.__env = jinja2.Environment(
         block_start_string = r'\STMT{',
         block_end_string = r'}',
@@ -34,10 +35,11 @@ class Template:
         comment_end_string = r'}',
         line_statement_prefix = '%%$',
         line_comment_prefix = '%%#',
-        trim_blocks = True,
-        lstrip_blocks = True,
+        #trim_blocks = True,
+        #lstrip_blocks = True,
         autoescape = False,
-        loader = jinja2.FileSystemLoader(str(root_dir))
+        loader = jinja2.FileSystemLoader([str(p) for p in paths]),
+        keep_trailing_newline=True
       )
 
   def get_default_conf_file(self):
@@ -55,7 +57,7 @@ class Template:
     if not target_dir.exists():
       target_dir.mkdir(parents=True)
 
-    file_list = env.get_template('files').render(config)
+    file_list = env.get_template('contents.yaml').render(config)
     for entry in yaml.load(file_list):
       if isinstance(entry, str):
         entry = {'src': entry, 'tgt': entry}
@@ -63,12 +65,11 @@ class Template:
       with open(target_dir / entry['tgt'], 'w') as out:
         template.stream(config).dump(out)
 
-DEFAULT_PATH = ':'.join( d + 'templates/' for d in [
+DEFAULT_PATH = ':'.join([
     './',
     '{HOME}/.local/share/latex-templates/'.format(HOME=os.environ['HOME']),
     '/usr/local/share/latex-templates/',
-    '/usr/share/latex-templates/']
-  )
+    '/usr/share/latex-templates/'])
 
 parser = argparse.ArgumentParser(description='Generate a LaTeX project from a template.')
 parser.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
@@ -78,7 +79,7 @@ parser.add_argument('output_dir', metavar='OUT_DIR',
 parser.add_argument('--get-config', '-c', action='store_true',
                    help='Instead of generating the template, create a default config file for it.')
 parser.add_argument('--path', '-p', dest='template_path', default=DEFAULT_PATH,
-                    help='Paths where templates are searched, colon-separated.')
+                    help='Paths where templates and libraries are searched, colon-separated.')
 parser.add_argument('--verbose', '-v', action='store_true')
 
 args = parser.parse_args()
@@ -88,7 +89,11 @@ def verbose(*args, **kwargs):
   if is_verbose:
     print(*args, **kwargs)
 
-template = Template.find(args.template_path.split(':'), args.template)
+
+path = args.template_path.split(':')
+template_path = [ Path(p) / 'templates' for p in path ]
+lib_path = [ Path(p) / 'libraries' for p in path ]
+template = Template.find(template_path, args.template, lib_path)
 
 if args.get_config:
   config_file = Path(args.config)

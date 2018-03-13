@@ -4,184 +4,33 @@
 
 \usepackage[hidelinks]{hyperref} % Used for hyperlinks
 \usepackage{comment}
-%%$ if subject.math:
-\usepackage{amsmath, amssymb, mathtools} % Used for typesetting maths
-\usepackage{amsthm} % Theorem environments
-%%$ endif
 \usepackage{environ, etoolbox}
 \usepackage{graphicx, xcolor} % Used for pictures
-%%$ if tikz:
-\usepackage{tikz} % Used for diagrams
-%%$ endif
 \usepackage{caption,subcaption} % Used for subfigures
 \usepackage{wrapfig} % Wrap text around diagrams
 \usepackage{array} % For custom table column specifications
 \usepackage{xargs, suffix} % Utilities for defining macros/commands
 \usepackage[shortlabels]{enumitem} % For enumerations with custom numbering and indentation
-%%$ if notes:
-\usepackage[status=draft]{fixme} % Used for notes/to-dos/issues.
-%%$ endif
 
+%%$ include "subject/math/imports.tex"
+%%$ include "notes/imports.tex"
+%%$ include "tikz/imports.tex"
+%%# The lines above ensure the necessary packages are imported
 
-%%% Minipage Indentation %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%% Preamble %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% The environment minipagepar works mostly like minipage, but indents
-% paragraphs properly. The regular minipage environment sets \parindent to zero,
-% which is good if you have images inside it but bad if you have text.
-%
-% Also, minipagepar can take only the first optional argument of minipage.
-
-\newlength{\currentparindent}
-\newenvironment{minipagepar}[2][]
-  {\setlength{\currentparindent}{\parindent}%
-   \begin{minipage}[#1]{#2}%
-   \setlength{\parindent}{\currentparindent}}
-   {\end{minipage}}
-
-%%$ if tikz:
-%%% TikZ utilities %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \usetikzlibrary{positioning,fit,calc} % Easier positions/sizes
-  \usetikzlibrary{backgrounds,shadows} % Prettier diagrams
-  \usetikzlibrary{graphs}
-  %%$ if subject.math.category_theory:
-  \usetikzlibrary{cd} % Commutative diagrams
-
-  \tikzset{commutative diagrams/transformation step/.style={Rightarrow}}
-  \tikzset{commutative diagrams/monic/.style={tail}}
-  \tikzset{commutative diagrams/epic/.style={two heads}}
-  %%$ endif
-
-  %%$ if tikz.externalize:
-  \usetikzlibrary{external\STMT{ if subject.math.category_theory }, cdext\STMT{ endif }}
-  %\tikzexternalize[prefix=images-tikz/]
-  %%$ endif
-
-  %%$ if subject.math.category_theory:
-  % Tikz corners for indicating pullbacks/pushouts
-    \newcommand{\corner}[1]{\tikz[#1]{ \draw[-] (0,.7em) -- (0,0) -- (.7em,0); }}
-    \renewcommand\llcorner{\corner{}}
-    \renewcommand\lrcorner{\corner{rotate=90}}
-    \renewcommand\urcorner{\corner{rotate=180}}
-    \renewcommand\ulcorner{\corner{rotate=270}}
-  %%$ endif
-%%$ endif
-
-%%% Abbreviations %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  %%$ if subject.gratra:
-  \newcommand{\dpo}{\textsc{dpo}}
-  \newcommand{\sqpo}{\textsc{sqpo}}
-  \newcommand{\pbpo}{\textsc{pbpo}}
-  \newcommand{\agree}{\textsc{agree}}
-  \newcommand{\NAC}{NAC}
-  \newcommand{\NACs}{NACs}
-  \newcommand{\AC}{AC}
-  \newcommand{\ACs}{ACs}
-  \newcommand{\fpbc}{\textsc{fpbc}}
-  \newcommand{\pb}{\textsc{pb}}
-  \newcommand{\po}{\textsc{po}}
-  \newcommand{\ipo}{\textsc{ipo}}
-  %%$ endif
-
-%%$ if subject.math:
-%%% Maths Utilities %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  
-  \newcommand{\circled}[1]{\ensuremath{\mbox{\textcircled{\scriptsize{$#1$}}}}}
-  \newcommand{\hole}{{-}}
-
-  %%$ if subject.math.sets:
-  %%% Set Theory %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \newcommand{\Nat}{\mathbb{N}}
-    \newcommand{\Powerset}[1]{\mathcal{P}(#1)}
-    \newcommand{\set}[1]{\left\{#1\right\}}
-    \WithSuffix\newcommand{\set}*[1]{\*#1\*}
-    \newcommand{\tuple}[1]{\left(#1\right)}
-    \WithSuffix\newcommand{\tuple}*[1]{(#1)}
-  %%$ endif
-
-  %%$ if subject.math.graphs:
-  %%% Graphs %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \newcommand{\src}{\mathit{src}}
-    \newcommand{\tgt}{\mathit{tgt}}
-  %%$ endif
-
-  %%$ if subject.math.category_theory:
-  %%% Category Theory %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \newcommand{\op}{\mathrm{op}}
-    \newcommand{\func}{\mathrm}
-    \renewcommand{\hom}{\func{Hom}}
-    \newcommand{\id}{\mathrm{id}}
-
-    \newcommand{\initialObj}{\mathbf{0}}
-    \newcommand{\terminalObj}{\mathbf{1}}
-    \newcommand{\uniqMorph}{\mathop{!}}
-
-    \newcommand{\Sub}[1]{\ensuremath{\mathbf{Sub}({#1})}}
-
-  %%% Names of categories %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \newcommand{\cat}{\mathbb}
-    \newcommand{\catSet}{{\mathbb{S}\mathrm{et}}}
-    \newcommand{\catGraph}{{\mathbb{G}\mathrm{raph}}}
-    \newcommand{\catHGraph}{{\mathbb{HG}\mathrm{raph}}}
-    \newcommandx{\catPshf}[2][1=\cat{C}, 2=\catSet]{{{#2}^{{#1}^\op}}}
-    \newcommandx{\catFunc}[2][1=\cat{C}, 2=\catSet]{{{#2}^{#1}}}
-  %%$ endif
-
-  %%% Arrows %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \renewcommand{\to}{\mathbin{\rightarrow}}
-    \newcommand{\injto}{\mathbin{\rightarrowtail}}
-    \newcommand{\surjto}{\mathbin{\twoheadrightarrow}}
-    \newcommand{\from}{\mathbin{\leftarrow}}
-    \newcommand{\injfrom}{\mathbin{\leftarrowtail}}
-
-    \newcommand{\To}{\Longrightarrow}
-    \newcommand{\From}{\Longleftarrow}
-
-    \WithSuffix\newcommand{\to}*[1]{\stackrel{#1}{\to}}
-    \WithSuffix\newcommand{\injto}*[1]{\stackrel{#1}{\injto}}
-    \WithSuffix\newcommand{\surjto}*[1]{\stackrel{#1}{\surjto}}
-    \WithSuffix\newcommand{\from}*[1]{\stackrel{#1}{\from}}
-    \WithSuffix\newcommand{\injfrom}*[1]{\stackrel{#1}{\injfrom}}
-
-    \WithSuffix\newcommand{\To}*[1]{\stackrel{#1}{\To}}
-    \WithSuffix\newcommand{\From}*[1]{\stackrel{#1}{\From}}
-
-  %%% Miscellaneous %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-    \newcommand{\ol}{\overline}
-
-%%% Theorem environments %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \newtheorem{lemma}{Lemma}
-  \newtheorem{theorem}{Theorem}
-  \newtheorem{corollary}{Corollary}
-  \newtheorem{fact}{Fact}
-  \theoremstyle{definition}
-  \newtheorem{definition}{Definition}
-  \newtheorem{construction}{Construction}
-  \newtheorem{remark}{Remark}
-  \newtheorem{example}{Example}
-
-  \def\lemmaautorefname{Lemma}
-  \def\theoremautorefname{Theorem}
-  \def\corollaryautorefname{Corollary}
-  \def\factautorefname{Fact}
-  \def\definitionautorefname{Def.}
-  \def\constructionautorefname{Construction}
-  \def\remarkautorefname{Remark}
-  \def\exampleautorefname{Example}
-%%$ endif
-
-%%$ if notes:
-%%% Draft notes %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-  \fxusetheme{colorsig}
-  %%$ for author in authors:
-
-  \FXRegisterAuthor{\EXPR{ author.cmd }}{l\EXPR{ author.cmd }}{\EXPR{ author.short }}
-  \newcommand{\\EXPR{ author.cmd }}[1]{\\EXPR{author.cmd}note{#1}}
-  \WithSuffix*{\\EXPR{ author.cmd }}[2]{\\EXPR{author.cmd}note*{#1}{#2}}
-  %%$ endfor
-%%$ endif
+%%$ include "minipagepar.tex"
+%%$ include "tikz/preamble.tex"
+%%$ include "subject/gratra/preamble.tex"
+%%$ include "subject/math/preamble.tex"
+%%$ include "notes/preamble.tex"
 
 %%% Text Styles %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
   \newcommand{\newconcept}[1]{\emph{\bfseries #1}}
+
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%% Document %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -189,6 +38,7 @@
 \begin{document}
 \pagestyle{plain}
 
+%%# Assemble the title
 \title{\EXPR{ title }}
 
 \author{
@@ -197,10 +47,12 @@
 
 \maketitle
 
+%%# Create the sections
 %%$ for section in sections:
-\section{\EXPR{ section.name }}\label{sec:\EXPR{ section.label }}
+\section{\EXPR{ section.title }}\label{sec:\EXPR{ section.label }}
 %%$ endfor
 
+%%# Import the bibliography
 \bibliographystyle{\EXPR{ bibstyle }}
 \bibliography{\EXPR{ name }}
 
