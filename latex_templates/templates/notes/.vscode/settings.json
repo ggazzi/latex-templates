@@ -1,0 +1,24 @@
+{
+  "latex-workshop.latex.toolchain": [
+      {
+          "command": "make",
+          "args": []
+      }
+  ],
+  "editor.tabSize": 2,
+  "files.exclude": {
+      ".build/**": true
+  },
+  "cSpell.ignoreRegExpList": [
+      "\\\\\\w*(\\[.*?\\])?(\\{.*?\\})?",
+      "\\\\begin\\{.*?\\}\\[.*?\\]",
+      "\\\\author\\{.*?\\}",
+      "\\\\newcommand\\{.*?\\}",
+      "\\\\tikz(graphs)?set\\{([^{}]*\\{.*?\\})*.*?\\}",
+      "\\$.+?\\$",
+      "^% !TEX.*$"
+  ],
+  "cSpell.enabledLanguageIds": [
+      "latex"
+  ]
+}

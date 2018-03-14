@@ -5,6 +5,8 @@
   src: notes.bib
   tgt: \EXPR{ name }.bib
 - Makefile
+- .vscode/settings.json
+- .gitignore
 %%$ if tikz and subject.math.category_theory:
 - 
   src: tikz/tikzlibrarycdext.code.tex
