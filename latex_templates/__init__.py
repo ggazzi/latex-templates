@@ -1,14 +1,14 @@
 #!/usr/bin/env python
 
-import jinja2
-import yaml
-import sys
 import argparse
-import pkg_resources
-import shutil
 import os
+import shutil
+import sys
 from pathlib import Path
 
+import jinja2
+import pkg_resources
+import yaml
 class Template:
 
   @classmethod

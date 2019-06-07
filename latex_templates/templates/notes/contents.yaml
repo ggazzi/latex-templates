@@ -1,6 +1,7 @@
 -
   src: notes.tex
   tgt: \EXPR{ name }.tex
+  main: true
 -
   src: notes.bib
   tgt: \EXPR{ name }.bib
