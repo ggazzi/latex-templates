@@ -13,15 +13,37 @@ class Template:
 
   @classmethod
   def find(cls, template_path, name, lib_path, verbose=False):
-    if verbose: print('Looking for template "{}"'.format(name))
+    if verbose: print(f'Looking for template "{name}"')
 
     for dir in template_path:
       path = Path(dir) / name
-      if verbose: print('  trying ' + str(path))
-      if path.is_dir():
+      if verbose: print('  trying ' + str(path), end='')
+      if cls.is_template(path):
+        if verbose: print(' FOUND!')
         return cls(path, lib_path)
+      elif verbose: print()
 
     raise Exception('No template "{}" found.'.format(name))
+
+  @classmethod
+  def find_all(cls, template_path, verbose=False):
+    if verbose: print('Listing all templates')
+
+    for dir in template_path:
+      if not dir.is_dir(): continue
+      if verbose: print(f'checking {dir}')
+
+      for subdir in Path(dir).iterdir():
+        if cls.is_template(subdir):
+          yield subdir.name
+
+  @classmethod
+  def is_template(cls, directory):
+    return (
+      directory.is_dir() and
+      (directory / 'default-conf.yaml').is_file() and
+      (directory / 'contents.yaml').is_file()
+    )
 
   def __init__(self, root_dir, lib_path):
     self.__root_dir = Path(root_dir)
@@ -75,8 +97,8 @@ class Template:
 
       else:
         template = env.get_template(entry['src'])
-      with open(out_path, 'w') as out:
-        template.stream(config).dump(out)
+        with open(out_path, 'w') as out:
+          template.stream(config).dump(out)
 
 def parse_args():
 
@@ -86,6 +108,9 @@ def parse_args():
   parser.add_argument('--verbose', '-v', action='store_true')
 
   commands = parser.add_subparsers()
+
+  parser_list = commands.add_parser('list', help='List all available templates.')
+  parser_list.set_defaults(command='list')
 
   parser_genconf = commands.add_parser('genconf', help='Generate a default config file for the given template.')
   parser_genconf.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
@@ -104,9 +129,9 @@ def parse_args():
   return parser.parse_args()
 
 DEFAULT_PATH = [
-    './',
-    '{HOME}/.local/share/latex-templates/'.format(HOME=os.environ['HOME']),
-    '/usr/local/share/latex-templates/',
+  './',
+  '{HOME}/.local/share/latex-templates/'.format(HOME=os.environ['HOME']),
+  '/usr/local/share/latex-templates/',
   '/usr/share/latex-templates/'
 ]
 
@@ -123,24 +148,29 @@ def main():
   template_path.append(Path(pkg_resources.resource_filename(__name__, 'templates')))
   lib_path.append(Path(pkg_resources.resource_filename(__name__, 'libraries')))
 
-  template = Template.find(template_path, args.template, lib_path, verbose=args.verbose)
+  if args.command == 'list':
+    for template in Template.find_all(template_path, verbose=args.verbose):
+      print(template)
 
-  if args.command == 'genconf':
-    config_file = Path(args.output_file)
-    
-    suffix = 0
-    new_file = config_file
-    while new_file.exists():
-      suffix += 1
-      new_file = config_file.with_suffix(config_file.suffix + '.{}'.format(suffix))
-
-    shutil.copyfile(template.get_default_conf_file(), new_file)
-  
   else:
-    with open(args.config_file) as config_file:
-      config = yaml.load(config_file)
+    template = Template.find(template_path, args.template, lib_path, verbose=args.verbose)
 
-    template.generate(config, Path(args.output_dir))
+    if args.command == 'genconf':
+      config_file = Path(args.output_file)
+      
+      suffix = 0
+      new_file = config_file
+      while new_file.exists():
+        suffix += 1
+        new_file = config_file.with_suffix(config_file.suffix + '.{}'.format(suffix))
+
+      shutil.copyfile(template.get_default_conf_file(), new_file)
+    
+    else:
+      with open(args.config_file) as config_file:
+        config = yaml.load(config_file)
+
+      template.generate(config, Path(args.output_dir))
 
 if __name__ == '__main__':
   main()
