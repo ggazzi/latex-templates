@@ -62,11 +62,19 @@ class Template:
     for entry in yaml.load(file_list):
       if isinstance(entry, str):
         entry = {'src': entry, 'tgt': entry}
-      template = env.get_template(entry['src'])
+      elif 'tgt' not in entry:
+        entry['tgt'] = entry['src']
 
       out_path = target_dir / entry['tgt']
       if not out_path.parent.exists():
         out_path.parent.mkdir(parents=True)
+
+      if 'raw' in entry and entry['raw']:
+        in_path = self.__root_dir / entry['src']
+        shutil.copyfile(in_path, out_path)
+
+      else:
+        template = env.get_template(entry['src'])
       with open(out_path, 'w') as out:
         template.stream(config).dump(out)
 
