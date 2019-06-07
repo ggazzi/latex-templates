@@ -5,10 +5,30 @@ import os
 import shutil
 import sys
 from pathlib import Path
+from typing import NamedTuple
 
 import jinja2
 import pkg_resources
 import yaml
+
+
+class GeneratedFile(NamedTuple):
+  src : Path
+  tgt : Path
+  is_raw : bool
+
+  @classmethod
+  def from_yaml(cls, entry):
+    if isinstance(entry, str):
+      src, tgt = entry, entry
+    else:
+      src = entry['src']
+      tgt = entry['tgt'] if 'tgt' in entry else src
+
+    raw = 'raw' in entry and entry['raw']
+
+    return cls(Path(src), Path(tgt), raw)
+
 class Template:
 
   @classmethod
@@ -73,32 +93,34 @@ class Template:
       return yaml.load(default_conf)
 
   def generate(self, config, target_dir):
-    config = {**self.get_default_conf(), **config}
+    config = self.__config_with_defaults(config)
     env = self.__env
 
     target_dir = Path(target_dir)
     if not target_dir.exists():
       target_dir.mkdir(parents=True)
 
-    file_list = env.get_template('contents.yaml').render(config)
-    for entry in yaml.load(file_list):
-      if isinstance(entry, str):
-        entry = {'src': entry, 'tgt': entry}
-      elif 'tgt' not in entry:
-        entry['tgt'] = entry['src']
-
-      out_path = target_dir / entry['tgt']
+    for entry in self.get_generated_files(config):
+      out_path = target_dir / entry.tgt
       if not out_path.parent.exists():
         out_path.parent.mkdir(parents=True)
 
-      if 'raw' in entry and entry['raw']:
-        in_path = self.__root_dir / entry['src']
+      if entry.is_raw:
+        in_path = self.__root_dir / entry.src
         shutil.copyfile(in_path, out_path)
 
       else:
-        template = env.get_template(entry['src'])
+        template = env.get_template(str(entry.src))
         with open(out_path, 'w') as out:
           template.stream(config).dump(out)
+
+  def get_generated_files(self, config):
+    config = self.__config_with_defaults(config)
+    file_list = self.__env.get_template('contents.yaml').render(config)
+    return [ GeneratedFile.from_yaml(entry) for entry in yaml.load(file_list) ]
+
+  def __config_with_defaults(self, config):
+    return {**self.get_default_conf(), **config}
 
 def parse_args():
 
