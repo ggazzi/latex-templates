@@ -167,6 +167,35 @@ DEFAULT_PATH = [
   '/usr/share/latex-templates/'
 ]
 
+def list_templates(template_path, verbose):
+    for template in Template.find_all(template_path, verbose):
+      print(template)
+
+def generate_config(template, output_file):
+      config_file = Path(output_file)
+      
+      suffix = 0
+      new_file = config_file
+      while new_file.exists():
+        suffix += 1
+        new_file = config_file.with_suffix(config_file.suffix + '.{}'.format(suffix))
+
+      shutil.copyfile(template.get_default_conf_file(), new_file)
+
+def generate_project(template, config, output_dir, should_compile, verbose):
+    template.generate(config, Path(output_dir))
+
+    if should_compile:
+      main_file = template.get_main_latex_file(config)
+      if main_file is None:
+        print('This template does not specify a main file.', file=sys.stderr)
+        sys.exit(1)
+
+      if verbose: print(f'Building from {main_file.tgt}')
+      subprocess.run(['latexmk', '-pdf', main_file.tgt], cwd = output_dir)
+
+      return (Path(output_dir) / main_file.tgt).with_suffix('.pdf')
+
 
 def main():
   args = parse_args()
@@ -181,40 +210,17 @@ def main():
   lib_path.append(Path(pkg_resources.resource_filename(__name__, 'libraries')))
 
   if args.command == 'list':
-    for template in Template.find_all(template_path, verbose=args.verbose):
-      print(template)
-
+    list_templates()
   else:
     template = Template.find(template_path, args.template, lib_path, verbose=args.verbose)
 
     if args.command == 'genconf':
-      config_file = Path(args.output_file)
+      generate_config(template, args.output_file)
       
-      suffix = 0
-      new_file = config_file
-      while new_file.exists():
-        suffix += 1
-        new_file = config_file.with_suffix(config_file.suffix + '.{}'.format(suffix))
-
-      shutil.copyfile(template.get_default_conf_file(), new_file)
-    
     else:
       with open(args.config_file) as config_file:
         config = yaml.load(config_file)
-
-      template.generate(config, Path(args.output_dir))
-
-      if args.build:
-        main_file = template.get_main_latex_file(config)
-        if main_file is None:
-          print('This template does not specify a main file.', file=sys.stderr)
-          sys.exit(1)
-
-        if args.verbose: print(f'Building from {main_file.tgt}')
-        subprocess.run(
-          ['latexmk', '-pdf', main_file.tgt],
-          cwd = args.output_dir
-        )
+        generate_project(template, config, args.output_dir, args.build, args.verbose)
         
 
 if __name__ == '__main__':
