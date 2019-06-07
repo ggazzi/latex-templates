@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import NamedTuple
 
 import jinja2
@@ -153,10 +154,17 @@ def parse_args():
   parser_gen.add_argument('output_dir', metavar='OUT_DIR',                                  
                           help='Directory where the generated files will be written.')
   parser_gen.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
-                          help='Configuration file for the generated template [default=./config.yaml]')
+                          help='Configuration file for the template [default=./config.yaml]')
   parser_gen.add_argument('--build', '-b', default=False, action='store_true',
                           help='Build the generated template with latexmk.')
   parser_gen.set_defaults(command='generate')
+
+  parser_build = commands.add_parser('build', help='Generate a PDF document from a template')
+  parser_build.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
+  parser_build.add_argument('--output-file', '-o', metavar='FILE', default=None)
+  parser_build.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
+                            help='Configuration file for the template [default=./config.yaml]')
+  parser_build.set_defaults(command='build')
 
   return parser.parse_args()
 
@@ -220,7 +228,14 @@ def main():
     else:
       with open(args.config_file) as config_file:
         config = yaml.load(config_file)
+
+      if args.command == 'generate':
         generate_project(template, config, args.output_dir, args.build, args.verbose)
+        
+      elif args.command == 'build':
+        with TemporaryDirectory() as output_dir:
+          main_file = generate_project(template, config, output_dir, True, args.verbose)
+          shutil.copyfile(main_file, args.output_file or Path() / main_file.name)
         
 
 if __name__ == '__main__':
