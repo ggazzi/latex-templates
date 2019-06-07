@@ -91,7 +91,7 @@ class Template:
 
   def get_default_conf_file(self):
     return self.__root_dir / 'default-conf.yaml'
-  
+
   def get_default_conf(self):
     with open(self.get_default_conf_file()) as default_conf:
       return yaml.load(default_conf)
@@ -151,7 +151,7 @@ def parse_args():
 
   parser_gen = commands.add_parser('generate', help='Generate a template based on a config file.')
   parser_gen.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
-  parser_gen.add_argument('output_dir', metavar='OUT_DIR',                                  
+  parser_gen.add_argument('output_dir', metavar='OUT_DIR',
                           help='Directory where the generated files will be written.')
   parser_gen.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
                           help='Configuration file for the template [default=./config.yaml]')
@@ -181,7 +181,7 @@ def list_templates(template_path, verbose):
 
 def generate_config(template, output_file):
       config_file = Path(output_file)
-      
+
       suffix = 0
       new_file = config_file
       while new_file.exists():
@@ -224,19 +224,19 @@ def main():
 
     if args.command == 'genconf':
       generate_config(template, args.output_file)
-      
+
     else:
       with open(args.config_file) as config_file:
         config = yaml.load(config_file)
 
       if args.command == 'generate':
         generate_project(template, config, args.output_dir, args.build, args.verbose)
-        
+
       elif args.command == 'build':
         with TemporaryDirectory() as output_dir:
           main_file = generate_project(template, config, output_dir, True, args.verbose)
           shutil.copyfile(main_file, args.output_file or Path() / main_file.name)
-        
+
 
 if __name__ == '__main__':
   main()
