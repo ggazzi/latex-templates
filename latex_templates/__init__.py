@@ -3,6 +3,7 @@
 import argparse
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from typing import NamedTuple
@@ -16,6 +17,7 @@ class GeneratedFile(NamedTuple):
   src : Path
   tgt : Path
   is_raw : bool
+  is_main : bool
 
   @classmethod
   def from_yaml(cls, entry):
@@ -26,8 +28,9 @@ class GeneratedFile(NamedTuple):
       tgt = entry['tgt'] if 'tgt' in entry else src
 
     raw = 'raw' in entry and entry['raw']
+    main = 'main' in entry and entry['main']
 
-    return cls(Path(src), Path(tgt), raw)
+    return cls(Path(src), Path(tgt), raw, main)
 
 class Template:
 
@@ -119,6 +122,11 @@ class Template:
     file_list = self.__env.get_template('contents.yaml').render(config)
     return [ GeneratedFile.from_yaml(entry) for entry in yaml.load(file_list) ]
 
+  def get_main_latex_file(self, config):
+    for entry in self.get_generated_files(config):
+      if entry.is_main: return entry
+    return None
+
   def __config_with_defaults(self, config):
     return {**self.get_default_conf(), **config}
 
@@ -146,6 +154,8 @@ def parse_args():
                           help='Directory where the generated files will be written.')
   parser_gen.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
                           help='Configuration file for the generated template [default=./config.yaml]')
+  parser_gen.add_argument('--build', '-b', default=False, action='store_true',
+                          help='Build the generated template with latexmk.')
   parser_gen.set_defaults(command='generate')
 
   return parser.parse_args()
@@ -193,6 +203,19 @@ def main():
         config = yaml.load(config_file)
 
       template.generate(config, Path(args.output_dir))
+
+      if args.build:
+        main_file = template.get_main_latex_file(config)
+        if main_file is None:
+          print('This template does not specify a main file.', file=sys.stderr)
+          sys.exit(1)
+
+        if args.verbose: print(f'Building from {main_file.tgt}')
+        subprocess.run(
+          ['latexmk', '-pdf', main_file.tgt],
+          cwd = args.output_dir
+        )
+        
 
 if __name__ == '__main__':
   main()
