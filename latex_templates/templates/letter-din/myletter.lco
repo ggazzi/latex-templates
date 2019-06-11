@@ -1,6 +1,8 @@
 \ProvidesFile{myletter.lco}
-\RequirePackage{graphicx}            
-\RequirePackage{xcolor}              
+\RequirePackage{graphicx}
+\RequirePackage{xcolor}
+\RequirePackage{mathpazo}
+\RequirePackage{eulervm}
 
 \xdefinecolor{darkgrey}{cmyk}{0,0,0,0.7}
 

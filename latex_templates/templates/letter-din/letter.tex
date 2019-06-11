@@ -17,6 +17,10 @@
 
 \begin{document}
 
+%%$ if date:
+\date{\EXPR{ date }}
+%%$ endif
+
 \begin{letter}{%
   \EXPR{ toaddr|join('\\\\\n') }
 }
@@ -40,12 +44,12 @@
 %%$ if enclosed|length == 1:
 
 \setkomavar*{enclseparator}{%
-  \EXPR{ 'Anlage' if sprache == 'de' else 'Enclosed' if sprache == 'en' }}
+  \EXPR{ 'Anlage' if lang == 'de' else 'Enclosed' if lang == 'en' else 'Anexo' if lang == 'ptbr' }}
 \encl{\EXPR{ enclosed[0] }}
 %%$ endif
 %%$ if enclosed|length > 1
 \setkomavar*{enclseparator}{%
-  \EXPR{ 'Anlagen' if sprache == 'de' else 'Enclosed' if sprache == 'en' }}:
+  \EXPR{ 'Anlagen' if lang == 'de' else 'Enclosed' if lang == 'en' else 'Anexos' if lang == 'ptbr'  }}
 \encl{
   \begin{itemize}
 %%$ for item in enclosed:
