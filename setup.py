@@ -8,7 +8,7 @@ setup(
     author='Guilherme Grochau Azzi',
     author_email='ggazzi@inf.ufrgs.br',
     license='MIT',
-    install_requires=['PyYAML', 'Jinja2'],
+    install_requires=['PyYAML', 'Jinja2', 'argcomplete'],
     packages=['latex_templates'],
     entry_points= {
       'console_scripts': ['latex-templates=latex_templates:main']

@@ -5,13 +5,16 @@ import os
 import shutil
 import subprocess
 import sys
+import textwrap
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import NamedTuple
 
+import argcomplete
 import jinja2
 import pkg_resources
 import yaml
+from argcomplete.completers import DirectoriesCompleter, FilesCompleter
 
 
 class GeneratedFile(NamedTuple):
@@ -36,8 +39,13 @@ class GeneratedFile(NamedTuple):
 class Template:
 
   @classmethod
-  def find(cls, template_path, name, lib_path, verbose=False):
+  def find(cls, name, template_path=None, lib_path=None, verbose=False):
     if verbose: print(f'Looking for template "{name}"')
+    
+    if template_path is None or lib_path is None:
+      tpath, lpath = search_paths()
+      template_path = template_path or tpath
+      lib_path = lib_path or lpath
 
     for dir in template_path:
       path = Path(dir) / name
@@ -130,54 +138,11 @@ class Template:
 
   def __config_with_defaults(self, config):
     return {**self.get_default_conf(), **config}
+    
 
-def parse_args():
-
-  parser = argparse.ArgumentParser(description='Generate a LaTeX project from a template.')
-  parser.add_argument('--path', '-p', dest='template_path', default=None,
-                      help='Paths where templates and libraries are searched, colon-separated.')
-  parser.add_argument('--verbose', '-v', action='store_true')
-
-  commands = parser.add_subparsers()
-
-  parser_list = commands.add_parser('list', help='List all available templates.')
-  parser_list.set_defaults(command='list')
-
-  parser_genconf = commands.add_parser('genconf', help='Generate a default config file for the given template.')
-  parser_genconf.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
-  parser_genconf.add_argument('--output-file', '-o', metavar='FILE', default='./config.yaml',
-                              help='File where the default config is written [default=./config.yaml]')
-  parser_genconf.set_defaults(command='genconf')
-
-  parser_gen = commands.add_parser('generate', help='Generate a template based on a config file.')
-  parser_gen.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
-  parser_gen.add_argument('output_dir', metavar='OUT_DIR',
-                          help='Directory where the generated files will be written.')
-  parser_gen.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
-                          help='Configuration file for the template [default=./config.yaml]')
-  parser_gen.add_argument('--build', '-b', default=False, action='store_true',
-                          help='Build the generated template with latexmk.')
-  parser_gen.set_defaults(command='generate')
-
-  parser_build = commands.add_parser('build', help='Generate a PDF document from a template')
-  parser_build.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.')
-  parser_build.add_argument('--output-file', '-o', metavar='FILE', default=None)
-  parser_build.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
-                            help='Configuration file for the template [default=./config.yaml]')
-  parser_build.set_defaults(command='build')
-
-  return parser.parse_args()
-
-DEFAULT_PATH = [
-  './',
-  '{HOME}/.local/share/latex-templates/'.format(HOME=os.environ['HOME']),
-  '/usr/local/share/latex-templates/',
-  '/usr/share/latex-templates/'
-]
-
-def list_templates(template_path, verbose):
+def enumerate_templates(template_path, verbose=False):
     for template in Template.find_all(template_path, verbose):
-      print(template)
+      yield template
 
 def generate_config(template, output_file):
       config_file = Path(output_file)
@@ -205,22 +170,93 @@ def generate_project(template, config, output_dir, should_compile, verbose):
       return (Path(output_dir) / main_file.tgt).with_suffix('.pdf')
 
 
-def main():
-  args = parse_args()
+DEFAULT_PATH = [
+  './',
+  '{HOME}/.local/share/latex-templates/'.format(HOME=os.environ['HOME']),
+  '/usr/local/share/latex-templates/',
+  '/usr/share/latex-templates/'
+]
 
-  path = args.template_path.split(':') if args.template_path else DEFAULT_PATH
-  if args.verbose:
-    print(f'Template lookup paths: {path}')
+PATH_ENV_VAR = 'LATEX_TEMPLATE_PATH'
 
-  template_path = [ Path(p) / 'templates' for p in path ]
-  lib_path = [ Path(p) / 'libraries' for p in path ]
+def search_paths():
+  if PATH_ENV_VAR in os.environ and os.environ[PATH_ENV_VAR]:
+    path = os.environ[PATH_ENV_VAR].split(':')
+  else:
+    path = DEFAULT_PATH
+
+  template_path = [Path(p) / 'templates' for p in path]
+  lib_path = [Path(p) / 'libraries' for p in path]
+
   template_path.append(Path(pkg_resources.resource_filename(__name__, 'templates')))
   lib_path.append(Path(pkg_resources.resource_filename(__name__, 'libraries')))
 
+  return template_path, lib_path
+
+
+def parse_args(template_path=None):
+  templates = list(enumerate_templates(template_path)) if template_path is not None else None
+
+  parser = argparse.ArgumentParser(
+    formatter_class=argparse.RawDescriptionHelpFormatter,
+    description='Generate a LaTeX project from a template.',
+    epilog=textwrap.dedent(f'''
+      Templates are searched according to the `{PATH_ENV_VAR}' variable, by default:
+        "{':'.join(DEFAULT_PATH)}"
+    ''')
+  )
+  parser.add_argument('--verbose', '-v', action='store_true')
+
+  commands = parser.add_subparsers()
+
+  parser_list = commands.add_parser('list', help='List all available templates.')
+  parser_list.set_defaults(command='list')
+
+  parser_genconf = commands.add_parser('genconf', help='Generate a default config file for the given template.')
+  parser_genconf.set_defaults(command='genconf')
+  parser_genconf.add_argument('template', type=str, metavar='TEMPLATE',
+                              help='Name of the desired template.',
+                              choices=templates)
+  parser_genconf.add_argument('--output-file', '-o', metavar='FILE', default='./config.yaml',
+                              help='File where the default config is written [default=./config.yaml]').completer = FilesCompleter
+
+  parser_gen = commands.add_parser('generate', help='Generate a template based on a config file.')
+  parser_gen.set_defaults(command='generate')
+  parser_gen.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.',
+                          choices=templates)
+  parser_gen.add_argument('output_dir', metavar='OUT_DIR',
+                          help='Directory where the generated files will be written.'
+                          ).completer = DirectoriesCompleter
+  parser_gen.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
+                          help='Configuration file for the template [default=./config.yaml]'
+                          ).completer = FilesCompleter
+  parser_gen.add_argument('--build', '-b', default=False, action='store_true',
+                          help='Build the generated template with latexmk.')
+
+  parser_build = commands.add_parser('build', help='Generate a PDF document from a template')
+  parser_build.set_defaults(command='build')
+  parser_build.add_argument('template', metavar='TEMPLATE', help='Name of the desired template.',
+                            choices=templates)
+  parser_build.add_argument('--output-file', '-o', metavar='FILE', type=Path, default=None
+                            ).completer = FilesCompleter
+  parser_build.add_argument('--config-file', '-c', metavar='FILE', default='./config.yaml',
+                            help='Configuration file for the template [default=./config.yaml]'
+                            ).completer = FilesCompleter
+
+  argcomplete.autocomplete(parser)
+  return parser.parse_args()
+
+def main():
+  template_path, lib_path = search_paths()
+  args = parse_args(template_path)
+
+  if args.verbose:
+    print(f'Template lookup paths: {path}')
+
   if args.command == 'list':
-    list_templates()
+    list_templates(template_path, args.verbose)
   else:
-    template = Template.find(template_path, args.template, lib_path, verbose=args.verbose)
+    template = Template.find(args.template, template_path, lib_path, verbose=args.verbose)
 
     if args.command == 'genconf':
       generate_config(template, args.output_file)
