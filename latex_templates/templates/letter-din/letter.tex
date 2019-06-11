@@ -1,0 +1,59 @@
+\documentclass[myletter]{scrlttr2}
+
+%%$ if lang == 'de':
+\usepackage[ngerman]{babel}
+%%$ elif lang == 'en':
+\usepackage[british]{babel}
+%%$ elif lang == 'ptbr':
+\usepackage[brazilian]{babel}
+%%$ endif
+
+\usepackage[document]{ragged2e} % Flattersatz
+
+
+\input{sender}
+
+
+
+\begin{document}
+
+\begin{letter}{%
+  \EXPR{ toaddr|join('\\\\\n') }
+}
+
+%%$ if title:
+\setkomavar{title}{\EXPR{ title }}
+%%$ endif
+\setkomavar{subject}{\EXPR{ subject }}
+
+\opening{\EXPR{ opening },}
+
+\EXPR{ body }
+
+\closing{\EXPR{ closing },}
+
+%%$ if ps:
+
+\ps PS: \EXPR{ ps }
+%%$ endif
+
+%%$ if enclosed|length == 1:
+
+\setkomavar*{enclseparator}{%
+  \EXPR{ 'Anlage' if sprache == 'de' else 'Enclosed' if sprache == 'en' }}
+\encl{\EXPR{ enclosed[0] }}
+%%$ endif
+%%$ if enclosed|length > 1
+\setkomavar*{enclseparator}{%
+  \EXPR{ 'Anlagen' if sprache == 'de' else 'Enclosed' if sprache == 'en' }}:
+\encl{
+  \begin{itemize}
+%%$ for item in enclosed:
+      \item \EXPR{ item }
+%%$ endfor
+  \end{itemize}
+}
+%%$ endif
+
+\end{letter}
+\end{document}

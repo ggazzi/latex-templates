@@ -1,0 +1,19 @@
+\setkomavar{fromname}{\EXPR{ sender.name }}
+\setkomavar{fromaddress}{%
+  \EXPR{ sender.address | join('\\\\\n') }
+}
+\setkomavar{fromemail}{\EXPR{ sender.email }}
+\setkomavar{fromphone}{\EXPR{ sender.phone }}
+\setkomavar{fromurl}{\EXPR{ sender.website }}
+\setkomavar{place}{\EXPR{ sender.place }}
+
+% Logo
+% \setkomavar{fromlogo}{\includegraphics{logo.png}}
+
+% Die Bankverbindung wird nicht automatisch verwendet. Dazu muss bspw. mittels \firstfoot ein eigener Brieffuß definiert werden.
+\setkomavar{frombank}{}
+
+% ===== Signatur =====
+\setkomavar{signature}{\usekomavar{fromname}}
+\renewcommand*{\raggedsignature}{\raggedright}
+% ====================

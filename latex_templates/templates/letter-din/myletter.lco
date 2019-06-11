@@ -1,0 +1,38 @@
+\ProvidesFile{myletter.lco}
+\RequirePackage{graphicx}            
+\RequirePackage{xcolor}              
+
+\xdefinecolor{darkgrey}{cmyk}{0,0,0,0.7}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\LoadLetterOption{DIN}%
+
+\providecaptionname{brazilian}{\phonename}{Tel.}
+
+\KOMAoptions{%
+    fromalign=center,%
+    fromphone=true,%
+    fromemail=true,%
+    fromrule=afteraddress,%
+    backaddress=plain,%
+    fontsize=11pt,%
+    foldmarks=b,%
+}
+
+\setkomavar{firsthead}{}
+\setkomavar{location}{%
+  \raggedleft\footnotesize{%
+  \usekomavar{fromname}\\
+  \usekomavar{fromaddress}\\[.25\baselineskip]
+  \hrule\vspace{.25\baselineskip}
+  \usekomavar*{fromphone}\usekomavar{fromphone}\\
+  \usekomavar*{fromemail}\usekomavar{fromemail}\\
+  \usekomavar*{fromurl}\usekomavar{fromurl}}%
+}
+
+\setkomavar{backaddressseparator}{~\textbullet~}
+\setkomafont{backaddress}{\color{darkgrey}}
+
+\setkomavar{fromemail}[]{}
+\setkomavar{fromurl}[]{}

@@ -1,0 +1,41 @@
+# Short project name, used for filenames
+name: letter 
+
+# Supported languages: en, de, ptbr
+lang: de
+
+title: 
+subject: Vorlage für Briefe
+
+toaddr:
+  - Musterstrasse 42
+  - 00000 Musterstadt
+
+sender: 
+  name: Max Mustermann
+  address:
+    - Musterstr. 42
+    - 01234 Musterstadt
+  place: Berlin
+  phone: +~49~30~123456
+  email: max.muster@muster.com
+  website: max.muster.com
+
+opening: Sehr geehrte Damen und Herren
+
+body: |
+  das ist ein mit \LaTeX\ gesetzter Brief.
+
+  \newpage
+
+  Wir haben nun eine zweite Seite.
+
+closing: Mit freundlichen Grüßen
+
+# A list of enclosed items can also be given
+# enclosed:
+#   - Erstes Dokument
+#   - Zweites Dokument
+
+# A postscript can also be given
+# ps: \dots

@@ -1,0 +1,6 @@
+-
+  src: letter.tex
+  tgt: \EXPR{ name }.tex
+  main: true
+- sender.tex
+- myletter.lco
