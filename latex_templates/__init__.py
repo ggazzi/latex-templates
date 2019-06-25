@@ -208,6 +208,7 @@ def parse_args(template_path=None):
   parser.add_argument('--verbose', '-v', action='store_true')
 
   commands = parser.add_subparsers()
+  parser.set_defaults(command='list')
 
   parser_list = commands.add_parser('list', help='List all available templates.')
   parser_list.set_defaults(command='list')
