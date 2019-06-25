@@ -254,7 +254,8 @@ def main():
     print(f'Template lookup paths: {path}')
 
   if args.command == 'list':
-    list_templates(template_path, args.verbose)
+    for template in enumerate_templates(template_path, args.verbose):
+      print(template)
   else:
     template = Template.find(args.template, template_path, lib_path, verbose=args.verbose)
 
