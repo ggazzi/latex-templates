@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='latex_templates',
-    version='0.1dev1',
+    version='0.1-dev1',
     description='Set of LaTeX project templates.',
     url='https://github.com/ggazzi/latex-templates',
     author='Guilherme Grochau Azzi',
