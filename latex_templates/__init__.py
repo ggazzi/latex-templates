@@ -70,7 +70,7 @@ class ProjectTemplate:
     be generated.
 
     In summary, template directory must containing at least the following two files:
-      - The default configuration file "default-config.yaml"
+      - The default configuration file "default-conf.yaml"
       - The contents template "contents.yaml"
 
     Each entry of the contents template may be either a string or an object with the
