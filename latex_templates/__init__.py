@@ -205,7 +205,7 @@ class ProjectTemplate:
 
     def load_default_conf(self) -> dict:
         with open(self.default_conf_file) as default_conf:
-            return yaml.load(default_conf)
+            return yaml.full_load(default_conf)
 
     def generate(self, config: dict, target_dir: Union[str, Path]):
         config = self.__config_with_defaults(config)
@@ -307,7 +307,7 @@ class ProjectTemplate:
         """Obtain a list of files that should be generated with the given config."""
         config = self.__config_with_defaults(config)
         file_list = self.__env.get_template("contents.yaml").render(config)
-        return [GeneratedFile.from_yaml(entry) for entry in yaml.load(file_list)]
+        return [GeneratedFile.from_yaml(entry) for entry in yaml.full_load(file_list)]
 
     def get_main_latex_file(self, config: dict) -> Optional[GeneratedFile]:
         """Obtain the main LaTeX file that may be used to compile a PDF, if there is one."""
@@ -502,7 +502,7 @@ def main():
 
         else:
             with open(args.config_file) as config_file:
-                config = yaml.load(config_file)
+                config = yaml.full_load(config_file)
 
             if args.command == "generate":
                 if args.build:
