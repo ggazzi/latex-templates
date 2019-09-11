@@ -235,6 +235,7 @@ class ProjectTemplate:
         *,
         output_path: Union[str, Path, None] = None,
         build_dir: Union[str, Path, None] = None,
+        overwrite: bool = False,
         verbose: bool = False,
     ) -> Path:
         """Generate the given project template and compile the resulting PDF.
@@ -256,6 +257,10 @@ class ProjectTemplate:
         If omitted, a temporary directory will be used and deleted as soon as
         compilation completes.
 
+        :param overwrite:
+        If false, add a suffix to the output filename to avoid overwriting
+        existing files.
+
         :param verbose:
         If true, write the compilation progress to the standard output.
 
@@ -268,12 +273,21 @@ class ProjectTemplate:
         output_path = None if output_path is None else Path(output_path)
         if build_dir is None:
             with TemporaryDirectory() as build_dir:
-                return self.__compile_pdf(config, output_path, Path(build_dir), verbose)
+                return self.__compile_pdf(
+                    config, output_path, Path(build_dir), overwrite, verbose
+                )
         else:
-            return self.__compile_pdf(config, output_path, Path(build_dir), verbose)
+            return self.__compile_pdf(
+                config, output_path, Path(build_dir), overwrite, verbose
+            )
 
     def __compile_pdf(
-        self, config: dict, output_path: Optional[Path], build_dir: Path, verbose: bool
+        self,
+        config: dict,
+        output_path: Optional[Path],
+        build_dir: Path,
+        overwrite: bool,
+        verbose: bool,
     ) -> Path:
         self.generate(config, build_dir)
 
@@ -295,7 +309,7 @@ class ProjectTemplate:
             if output_path.is_dir():
                 output_path = (output_path / main_file.tgt).with_suffix(".pdf")
             output_file, i = output_path, 1
-            while output_file.exists():
+            while output_file.exists() and not overwrite:
                 output_file = output_path.parent / f"{output_path.stem} ({i}).pdf"
                 i += 1
             shutil.copyfile(str(generated_file), str(output_file))
@@ -477,6 +491,12 @@ def parse_args(template_path=None):
         default="./config.yaml",
         help="Configuration file for the template [default=./config.yaml]",
     ).completer = FilesCompleter
+    parser_build.add_argument(
+        "--force-overwrite",
+        "-f",
+        action="store_true",
+        help="Overwrite the output file if it exists, instead of adding a suffix.",
+    )
 
     argcomplete.autocomplete(parser)
     return parser.parse_args()
@@ -507,14 +527,20 @@ def main():
             if args.command == "generate":
                 if args.build:
                     template.compile_pdf(
-                        config, build_dir=args.output_dir, verbose=args.verbose
+                        config,
+                        build_dir=args.output_dir,
+                        verbose=args.verbose,
+                        overwrite=True,
                     )
                 else:
                     template.generate(config, args.output_dir)
 
             elif args.command == "build":
                 template.compile_pdf(
-                    config, output_path=args.output_file or Path(), verbose=args.verbose
+                    config,
+                    output_path=args.output_file or Path(),
+                    verbose=args.verbose,
+                    overwrite=args.force_overwrite,
                 )
 
 
