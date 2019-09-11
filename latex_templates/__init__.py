@@ -2,20 +2,20 @@
 
 import argparse
 import os
+import runpy
 import shutil
 import subprocess
 import sys
 import textwrap
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import NamedTuple, List, Union, Iterable, Optional, Tuple
+from typing import Iterable, List, NamedTuple, Optional, Tuple, Union
 
 import argcomplete
 import jinja2
 import pkg_resources
 import yaml
 from argcomplete.completers import DirectoriesCompleter, FilesCompleter
-
 
 __all__ = [
     "ProjectTemplate",
@@ -415,6 +415,13 @@ def parse_args(template_path=None):
         ),
     )
     parser.add_argument("--verbose", "-v", action="store_true")
+    parser.add_argument(
+        "--import",
+        metavar="PYTHON_FILE",
+        action="append",
+        dest="import_modules",
+        help="Additional python files to import, useful if the YAML configs contain tags.",
+    )
 
     commands = parser.add_subparsers()
     parser.set_defaults(command="list")
@@ -508,6 +515,9 @@ def main():
 
     if args.verbose:
         print(f"Template lookup paths: {template_path}")
+
+    for module in args.import_modules:
+        runpy.run_path(module)
 
     if args.command == "list":
         for template in enumerate_templates(template_path, args.verbose):
