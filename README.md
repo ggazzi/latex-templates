@@ -1,6 +1,6 @@
 # LaTeX Templates
 
-A collection of configurable templates for LaTeX projects.
+Utilities for managing configuration templates of LaTeX projects.
 The templates are handled by Jinja2, with configuration loaded from YAML files.
 
 ## Dependencies
@@ -49,7 +49,7 @@ The main motivation is to have a lightweight set of LaTeX libraries with the fol
 
   - Easy reuse when creating new projects
   - Easy sharing of projects with co-authors
-  - Suitability of projects for publication
+  - Suitability of projects for professional copy-editing before publication
 
 The last two points mean that these libraries must be _copied_ into each project, instead of being left in the environment.
 This is useful for small or domain-specific utilities, since incorporating them in the standard LaTeX distributions is not feasible or desirable.
