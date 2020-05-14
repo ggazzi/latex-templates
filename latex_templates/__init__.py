@@ -41,16 +41,16 @@ class GeneratedFile(NamedTuple):
             src = entry["src"]
             tgt = entry["tgt"] if "tgt" in entry else src
 
-        raw = "raw" in entry and entry["raw"]
-        main = "main" in entry and entry["main"]
+        is_raw = bool("raw" in entry and entry["raw"])
+        is_main = bool("main" in entry and entry["main"])
 
-        return cls(Path(src), Path(tgt), raw, main)
+        return cls(Path(src), Path(tgt), is_raw, is_main)
 
 
 class ProjectTemplateNotFoundError(Exception):
-    def __init__(self, template_name, *args, **kwargs):
+    def __init__(self, template_name, *args):
         super(ProjectTemplateNotFoundError, self).__init__(
-            f'No project template named "{template_name}" was found.', *args, **kwargs
+            f'No project template named "{template_name}" was found.', *args
         )
 
 
@@ -204,7 +204,7 @@ class ProjectTemplate:
         return self.__root_dir / "default-conf.yaml"
 
     def load_default_conf(self) -> dict:
-        with open(self.default_conf_file) as default_conf:
+        with open(str(self.default_conf_file)) as default_conf:
             return yaml.full_load(default_conf)
 
     def generate(self, config: dict, target_dir: Union[str, Path]):
@@ -299,7 +299,7 @@ class ProjectTemplate:
             print(f"Building from {main_file.tgt}")
         subprocess.run(
             ["latexmk", "-pdf", main_file.tgt],
-            cwd=build_dir,
+            cwd=str(build_dir),
             stdout=sys.stdout if verbose else subprocess.DEVNULL,
             stderr=sys.stderr if verbose else subprocess.DEVNULL,
         )
@@ -348,7 +348,7 @@ def generate_config(template: ProjectTemplate, output_file: Union[str, Path]):
         suffix += 1
         new_file = config_file.with_suffix(config_file.suffix + ".{}".format(suffix))
 
-    shutil.copyfile(template.default_conf_file, new_file)
+    shutil.copyfile(str(template.default_conf_file), new_file)
 
 
 def generate_project(
@@ -404,6 +404,7 @@ def parse_args(template_path=None):
         list(enumerate_templates(template_path)) if template_path is not None else None
     )
 
+    # noinspection PyTypeChecker
     parser = argparse.ArgumentParser(
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description="Generate a LaTeX project from a template.",
