@@ -371,7 +371,7 @@ def generate_project(
 
 DEFAULT_PATH = [
     "./",
-    "{HOME}/.local/share/latex-templates/".format(HOME=os.environ["HOME"]),
+    "{HOME}/.local/share/latex-templates/".format(HOME=Path.home()),
     "/usr/local/share/latex-templates/",
     "/usr/share/latex-templates/",
 ]
@@ -420,6 +420,7 @@ def parse_args(template_path=None):
         metavar="PYTHON_FILE",
         action="append",
         dest="import_modules",
+        default=[],
         help="Additional python files to import, useful if the YAML configs contain tags.",
     )
 
