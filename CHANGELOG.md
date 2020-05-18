@@ -7,9 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.1] - 2020-05-18
+
 ### Fixed
 - Fix incompatibility with earlier Python versions due to use of pathlib.Path
   as argument to some functions
 - Fix incompatibility with Windows when grabbing the home folder
 
-## 0.1.0
+## [0.1.0]
