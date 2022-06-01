@@ -1,11 +1,18 @@
 \setkomavar{fromname}{\EXPR{ sender.name }}
 \setkomavar{fromaddress}{%
-  \EXPR{ sender.address | join('\\\\\n') }
+  \EXPR{ sender.address | join('\\\\\n') }%
 }
 \setkomavar{fromemail}{\EXPR{ sender.email }}
 \setkomavar{fromphone}{\EXPR{ sender.phone }}
 \setkomavar{fromurl}{\EXPR{ sender.website }}
 \setkomavar{place}{\EXPR{ sender.place }}
+
+%%$ if "shortname" in sender:
+\setkomavar{backaddress}{%
+  \EXPR{ sender.shortname }\\
+  \EXPR{ sender.address | join('\\\\\n') }%
+}
+%%$ endif
 
 % Logo
 % \setkomavar{fromlogo}{\includegraphics{logo.png}}
