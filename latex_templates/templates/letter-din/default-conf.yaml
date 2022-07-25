@@ -34,9 +34,19 @@ body: |
 closing: Mit freundlichen Grüßen
 
 # A list of enclosed items can also be given
+#
+# If just a string is given, it is used as a name.
+# If a path is also included, the given PDF is included after the letter.
+# It is also listed in the PDF index with the name or,
+# if given, with the short name.
+#
 # enclosed:
 #   - Erstes Dokument
-#   - Zweites Dokument
+#   - name: Zweites Dokument
+#     pdf: path/to/document.pdf
+#   - name: Drittes Dokument
+#     short: Drittes
+#     pdf: path/to/document.pdf
 
 # A postscript can also be given
 # ps: \dots

@@ -8,8 +8,14 @@
 \usepackage[brazilian]{babel}
 %%$ endif
 
-\usepackage[document]{ragged2e} % Flattersatz
+\usepackage{pdfpages}
+\usepackage{hyperref}
+\hypersetup{
+  pdftitle={\EXPR{ title if title else subject }},
+  pdfauthor={\EXPR{ sender.name }}
+}
 
+\newcommand{\pdfchapter}[1]{\phantomsection\addcontentsline{toc}{chapter}{#1}}
 
 \input{sender}
 
@@ -24,6 +30,8 @@
 \begin{letter}{%
   \EXPR{ toaddr|join('\\\\\n') }
 }
+
+\pdfchapter{\EXPR{ title if title else subject }}
 
 %%$ if title:
 \setkomavar{title}{\EXPR{ title }}
@@ -45,7 +53,7 @@
 
 \setkomavar*{enclseparator}{%
   \EXPR{ 'Anlage' if lang == 'de' else 'Enclosed' if lang == 'en' else 'Anexo' if lang == 'ptbr' }}
-\encl{\EXPR{ enclosed[0] }}
+\encl{\EXPR{ enclosed[0] if enclosed[0] is string else enclosed[0].name }}
 %%$ endif
 %%$ if enclosed|length > 1
 \setkomavar*{enclseparator}{%
@@ -53,11 +61,20 @@
 \encl{
   \begin{itemize}
 %%$ for item in enclosed:
-      \item \EXPR{ item }
+      \item \EXPR{ item if item is string else item.name }
 %%$ endfor
   \end{itemize}
 }
 %%$ endif
 
 \end{letter}
+
+\pagestyle{empty}
+
+%%$ set enclosed_pdfs = enclosed | select('mapping') | selectattr('pdf')
+%%$ for item in enclosed_pdfs:
+\pdfchapter{\EXPR{ item.short if 'short' in item else item.name }}
+\includepdf[pages={\EXPR{ item.pages if 'pages' in item else '-' }}]{\EXPR{ item.pdf }}
+%%$ endfor
+
 \end{document}
