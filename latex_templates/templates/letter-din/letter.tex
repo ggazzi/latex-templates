@@ -74,7 +74,7 @@
 %%$ set enclosed_pdfs = enclosed | select('mapping') | selectattr('pdf')
 %%$ for item in enclosed_pdfs:
 \pdfchapter{\EXPR{ item.short if 'short' in item else item.name }}
-\includepdf[pages={\EXPR{ item.pages if 'pages' in item else '-' }}]{\EXPR{ item.pdf }}
+\includepdf[pages={\EXPR{ item.pages if 'pages' in item else '-' }}]{\EXPR{ cwd }/\EXPR{ item.pdf }}
 %%$ endfor
 
 \end{document}

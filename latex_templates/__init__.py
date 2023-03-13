@@ -333,7 +333,6 @@ class ProjectTemplate:
     def __config_with_defaults(self, config: dict) -> dict:
         return {**self.load_default_conf(), **config}
 
-
 def enumerate_templates(template_path: SearchPath, verbose: bool = False):
     for template in ProjectTemplate.find_all(template_path, verbose):
         yield template
@@ -535,6 +534,7 @@ def main():
         else:
             with open(args.config_file) as config_file:
                 config = yaml.full_load(config_file)
+            config['cwd'] = Path(args.config_file).resolve().parent
 
             if args.command == "generate":
                 if args.build:
